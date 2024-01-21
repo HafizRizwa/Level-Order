@@ -1,0 +1,137 @@
+#include <iostream>
+using namespace std;
+
+class treeNode {
+public:
+    int data;
+    treeNode* left;
+    treeNode* right;
+
+    treeNode(int value)
+	{
+		 data=value;
+		 left=nullptr;
+		 right=nullptr;
+	}
+};
+
+class QueueNode {
+public:
+    treeNode* data;
+    QueueNode* next;
+
+    QueueNode(treeNode* value) 
+	 {
+	 data=value;
+	 next=nullptr;
+	 }
+};
+
+class MyQueue {
+private:
+    QueueNode* front;
+    QueueNode* rear;
+
+public:
+    MyQueue() 
+	 {
+	 front=nullptr;
+	  rear=nullptr;
+	 }
+
+    bool isEmpty() {
+        return front == nullptr;
+    }
+
+    void enqueue(treeNode* value) {
+        QueueNode* newNode = new QueueNode(value);
+        if (isEmpty()) {
+            front = rear = newNode;
+        } else {
+            rear->next = newNode;
+            rear = newNode;
+        }
+    }
+
+    treeNode* dequeue() {
+        if (isEmpty()) {
+            return nullptr;
+        }
+
+        QueueNode* temp = front;
+        treeNode* value = temp->data;
+
+        front = front->next;
+        delete temp;
+
+        return value;
+    }
+};
+
+class BinaryTree {
+public:
+    treeNode* root;
+
+    BinaryTree()   {
+	root=nullptr;
+	}
+
+    void buildTree(int nodes[], int size) {
+        if (size <= 0) return;
+
+        root = new treeNode(nodes[0]);
+        MyQueue q;
+        q.enqueue(root);
+
+        for (int i = 1; i < size; i += 2) {
+            treeNode* current = q.dequeue();
+
+            if (nodes[i] != -1) {
+                current->left = new treeNode(nodes[i]);
+                q.enqueue(current->left);
+            }
+
+            if (i + 1 < size && nodes[i + 1] != -1) {
+                current->right = new treeNode(nodes[i + 1]);
+                q.enqueue(current->right);
+            }
+        }
+    }
+
+    void levelOrder() {
+        if (root == nullptr) return;
+
+        MyQueue q;
+        q.enqueue(root);
+        q.enqueue(nullptr);  // Add a nullptr to indicate the end of each level
+
+        while (!q.isEmpty()) {
+            treeNode* current = q.dequeue();
+
+            if (current == nullptr) {
+                cout << endl;
+                if (!q.isEmpty()) {
+                    q.enqueue(nullptr);  // Add a nullptr for the next level
+                }
+            } else {
+                cout << current->data << " ";
+
+                if (current->left != nullptr) q.enqueue(current->left);
+                if (current->right != nullptr) q.enqueue(current->right);
+            }
+        }
+    }
+};
+
+int main() {
+    int nodes[] = {1, 2, 3, 4, 5, -1, 7, -1, -1, -1, -1, -1, -1};
+    int size = sizeof(nodes) / sizeof(nodes[0]);
+
+    BinaryTree tree;
+    tree.buildTree(nodes, size);
+
+    cout << "Level-order" << endl;
+    tree.levelOrder();
+
+    return 0;
+}
